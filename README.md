@@ -5,8 +5,6 @@ En el presente repositorio se encontrará con los script  de trabajo para el pro
 <strong>Formato: </strong> Do Files  
 <strong>Programa: </strong> Stata  
 
-----------------------------------------------------------
-
 ## Contenido:
 
 <strong>1: </strong> Indicadores de Mercado de Trabajo
