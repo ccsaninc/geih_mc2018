@@ -46,11 +46,16 @@
 
 * Grupo de Pofesionales
 
-    gen oficio_c8_2 = substr(oficio_c8,1,2)
+	gen oficio_c8_2 = substr(oficio_c8,1,2)
     destring oficio_c8_2 , replace
 
     gen oficio_f = 1 if oficio_c8_2 >= 0 & oficio_c8_2 <=14
     replace oficio_f = 0 if oficio_c8_2 >= 21
+	replace oficio_f = . if oficio_c8_2 == .
+
+    label var oficio_f  "Grupos de Oficio a 2 digitos"
+	label define oficio_f  1 "00-20" 0 "21 y más"
+	label values oficio_f  oficio_f
 
 *- Directorio de variables 
 
@@ -107,11 +112,15 @@
     replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 1 & mer_año == 1 
     replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 1 
 
+        *------
+        replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 3 & oficio_f == 1 
+
     * Informal    
     replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 1 & mer_año == 0 
     replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 2 
     
-    replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 3 
+        *------
+        replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 3 & oficio_f == 0
 
 
 
