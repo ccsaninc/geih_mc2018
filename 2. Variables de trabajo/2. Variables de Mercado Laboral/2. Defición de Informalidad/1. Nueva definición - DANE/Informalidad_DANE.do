@@ -8,6 +8,8 @@
 *** Informalidad Laboral - Construcción de la nueva medición de informalidad ***
 *** Nota: Ver presentación del DANE para ver metodologia propuesta ****
 
+    global añot = 2022   // Documentar el año de analisis
+
 * Identificacion de la posicion ocupacional
 
         gen poc_ocu = .
@@ -33,6 +35,16 @@
 		label define tam5_empresa 1 "Hasta 5 personas" 0 "Mayor a 5 personas"
 		label values tam5_empresa tam5_empresa
 
+* Año de renovación del registro mercantil
+
+    gen mer_año = 1 if p3067s2 = $añot - 1 
+    replace mer_año = 2 if p3067s2 < $añot - 1
+
+    label var mer_año  "Renovar registro mercantil"
+	label define mer_año  1 "t-1" 0 "Menor a t-1"
+	label values mer_año  mer_año 
+
+
 *- Directorio de variables 
 
 /*
@@ -42,7 +54,8 @@
     p3046 - La empresa o negocio en la que …… trabaja tiene una oficina de contabilidad o cuenta con los servicios de un contador?
     p3069 - ¿Cuántas personas en total tiene la empresa, negocio, industria, oficina, firma, finca o sitio donde ... trabaja?
     p6765 - En la semana pasada, ¿cuál de las siguientes formas de trabajo realizó:
-
+    p3067s1 - ¿... ha renovado ese registro?
+    p3067s2 - 
 */
 
 *- Generacion de la variable de informalidad
@@ -74,7 +87,19 @@
     replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 != 7 & (p3045s1 == 2 | p3045s1 == 9) & p3046 == 2 
     replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 != 7 & (p3045s1 == 2 | p3045s1 == 9) & p3046 == 2 & tam5_empresa == 1
 
+*- Independientes con negocio: Independientes (Tercera diapositiva)
+
+    * Formal
+    replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 1 & p3067s2 == $añot - 1 
+
+
+
     
+
+    * Informal    
+    
+
+
 
 
 
