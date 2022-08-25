@@ -38,40 +38,36 @@
 				
 		forvalues año = $f_i / $f_f {
 			
-
 			foreach mes in $mes {
 		
 					cd "$path/`año'/`mes'/"
 					
 					use "Características generales, seguridad social en salud y educación.dta" , replace
-					rename *, lower
 					
+					rename *, lower
 					tostring mes , replace
 					replace mes = "`mes'"
-					
 					compress
 					save, replace
 					clear
 					
 					*----------------------------
 					use "Datos del hogar y la vivienda.dta" , replace
-					rename *, lower
 					
+					rename *, lower
 					tostring mes , replace
 					replace mes = "`mes'"
-					
 					compress
 					save, replace
 					clear
-					
+
 					*----------------------------
 					
 					use "Fuerza de trabajo.dta" , replace
+
 					rename *, lower
-					
 					tostring mes , replace
 					replace mes = "`mes'"
-					
 					compress
 					save, replace
 					clear
@@ -79,23 +75,21 @@
 					*----------------------------
 					
 					use "Migración.dta" , replace
+
 					rename *, lower
-					
 					tostring mes , replace
 					replace mes = "`mes'"
-					
 					compress
 					save, replace
 					clear
-					
+										
 					*----------------------------
 					
 					use "No ocupados.dta" , replace
+
 					rename *, lower
-					
 					tostring mes , replace
 					replace mes = "`mes'"
-					
 					compress
 					save, replace
 					clear
@@ -103,11 +97,10 @@
 					*----------------------------
 					
 					use "Ocupados.dta" , replace
+
 					rename *, lower
-					
 					tostring mes , replace
 					replace mes = "`mes'"
-					
 					compress
 					save, replace
 					clear
@@ -115,11 +108,10 @@
 					*----------------------------
 					
 					use "Otras formas de trabajo.dta" , replace
+
 					rename *, lower
-					
 					tostring mes , replace
 					replace mes = "`mes'"
-					
 					compress
 					save, replace
 					clear
@@ -127,11 +119,10 @@
 					*----------------------------
 					
 					use "Otros ingresos e impuestos.dta" , replace
+
 					rename *, lower
-					
 					tostring mes , replace
 					replace mes = "`mes'"
-					
 					compress
 					save, replace
 					clear
@@ -139,14 +130,13 @@
 					*----------------------------
 					
 					use "Tipo de investigación.dta" , replace
+
 					rename *, lower
-					
 					tostring mes , replace
 					replace mes = "`mes'"
-					
 					compress
 					save, replace
-					clear	
+					clear
 										
 									
 			}
@@ -196,7 +186,7 @@
 					
 				}
 					
-				save "GEIH_`año'.dta" , replace
+				save "$path/3. Bases/GEIH_`año'.dta" , replace
 				
 			}
 			
