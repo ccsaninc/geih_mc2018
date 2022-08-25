@@ -44,6 +44,13 @@
 	label define mer_año  1 "t-1" 0 "Menor a t-1"
 	label values mer_año  mer_año 
 
+* Grupo de Pofesionales
+
+    gen oficio_c8_2 = substr(oficio_c8,1,2)
+    destring oficio_c8_2 , replace
+
+    gen oficio_f = 1 if oficio_c8_2 >= 0 & oficio_c8_2 <=14
+    replace oficio_f = 0 if oficio_c8_2 >= 21
 
 *- Directorio de variables 
 
@@ -55,8 +62,15 @@
     p3069 - ¿Cuántas personas en total tiene la empresa, negocio, industria, oficina, firma, finca o sitio donde ... trabaja?
     p6765 - En la semana pasada, ¿cuál de las siguientes formas de trabajo realizó:
     p3067s1 - ¿... ha renovado ese registro?
-    p3067s2 - 
-*/
+    p3067s2 - ¿Cuál fue el último año en el que renovó este registro?
+    p6775 - ¿El negocio o actividad de ... lleva contabilidad (realiza anualmente balance general y estado de perdidas y ganancias), o libro de registro diario de operaciones?
+
+    *- Variable de Oficio -*
+
+    oficio_c8 - Oficio de los Ocupados
+    
+    */
+
 
 *- Generacion de la variable de informalidad
 
@@ -90,14 +104,14 @@
 *- Independientes con negocio: Independientes (Tercera diapositiva)
 
     * Formal
-    replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 1 & p3067s2 == $añot - 1 
-
-
-
-    
+    replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 1 & mer_año == 1 
+    replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 1 
 
     * Informal    
+    replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 1 & mer_año == 0 
+    replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 2 
     
+    replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 3 
 
 
 
