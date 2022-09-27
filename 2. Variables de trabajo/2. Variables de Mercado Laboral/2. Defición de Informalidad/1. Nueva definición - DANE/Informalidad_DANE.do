@@ -2,7 +2,7 @@
 * Insitucion:   	Banco Mundial - Grupo de Empleo 
 * Autor: 			Cristian Camilo Sanin Camargo 						  
 * Version:			1.0
-* Descripción:		Empalme GEIH MC2018
+* Descripción:		Definicion de informalidad - DANE MC2018 - Nueva 
 *********************************************************************************************
 
 *** Informalidad Laboral - Construcción de la nueva medición de informalidad ***
