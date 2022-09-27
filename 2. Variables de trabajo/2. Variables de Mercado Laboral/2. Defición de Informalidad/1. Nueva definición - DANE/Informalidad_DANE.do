@@ -1,7 +1,7 @@
 ********************************************************************************************
 * Insitucion:   	Banco Mundial - Grupo de Empleo 
-* Autor: 			Cristian Camilo Sanin Camargo 						  
-* Version:			1.0
+* Autor: 		    Cristian Camilo Sanin Camargo 						  
+* Version:		    1.0
 * Descripción:		Definicion de informalidad - DANE MC2018 - Nueva 
 *********************************************************************************************
 
@@ -109,5 +109,6 @@ replace ei=formal if inlist(p6430,4,5) & ei==.
 replace ei=1 if inlist(p6430,1,2,3,7) & (salud==1 & pension==1) & ei==.
 replace ei=0 if inlist(p6430,1,2,3,7) & ei==.
 
+*- Tab de verificación de di file -*
 
 tab ei if oci==1 & inlist(mes,5,6,7) [iw=fex_c18 /3],m
