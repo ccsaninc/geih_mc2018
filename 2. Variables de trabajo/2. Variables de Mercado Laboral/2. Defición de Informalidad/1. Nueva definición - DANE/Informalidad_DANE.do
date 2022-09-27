@@ -8,122 +8,106 @@
 *** Informalidad Laboral - Construcción de la nueva medición de informalidad ***
 *** Nota: Ver presentación del DANE para ver metodologia propuesta ****
 
-    global añot = 2022   // Documentar el año de analisis
+    clear
+    cd " "  // Documentar la ruta de trabajo
+    dir
 
-* Identificacion de la posicion ocupacional
+use GEIH2022.dta , clear // data
 
-        gen poc_ocu = .
-		replace poc_ocu = 1 if p6430==1 
-		replace poc_ocu = 2 if p6430==2
-		replace poc_ocu = 3 if p6430==3
-		replace poc_ocu = 4 if p6430==4
-		replace poc_ocu = 5 if p6430==5
-		replace poc_ocu = 6 if p6430==6
-		replace poc_ocu = 7 if p6430==7
-		replace poc_ocu = 8 if p6430==8
-        replace poc_ocu = 8 if p6430==9
-		
-		label var poc_ocu "Posicion ocupacional"
-		label define poc_ocu 1 "Asalariado privado" 2 "Empleados de Gobierno" 3 "Empleado Domestico" 4 "Trabajadores cuenta propia" 5 "Patron" 6 "TF: Trabajador sin remuneracion" 7 "Trabajador sin remuneracion" 8 "Jornalero" 9 "Otro"
-		label values poc_ocu poc_ocu 
+gen anios=(per-1)
+gen oficio_c8_2d=substr(oficio_c8,1,2)
+destring oficio_c8_2d, replace
 
-* Tamaño de la empresa
+gen formal =.
 
-        recode p3069 (1/3 = 1 ) (4/10 = 0) , gen (tam5_empresa)
-        
-        label var tam5_empresa "tamaño de la empresa"
-		label define tam5_empresa 1 "Hasta 5 personas" 0 "Mayor a 5 personas"
-		label values tam5_empresa tam5_empresa
+replace formal=0 if p6430==3
+replace formal=0 if p6430==6 & formal==.
+replace formal=1 if inlist(rama2d_r4,"84","99") & formal==.
+replace formal=0 if p6430==8 & formal==.
 
-* Año de renovación del registro mercantil
-
-    gen mer_año = 1 if p3067s2 = $añot - 1 
-    replace mer_año = 2 if p3067s2 < $añot - 1
-
-    label var mer_año  "Renovar registro mercantil"
-	label define mer_año  1 "t-1" 0 "Menor a t-1"
-	label values mer_año  mer_año 
-
-* Grupo de Pofesionales
-
-	gen oficio_c8_2 = substr(oficio_c8,1,2)
-    destring oficio_c8_2 , replace
-
-    gen oficio_f = 1 if oficio_c8_2 >= 0 & oficio_c8_2 <=14
-    replace oficio_f = 0 if oficio_c8_2 >= 21
-	replace oficio_f = . if oficio_c8_2 == .
-
-    label var oficio_f  "Grupos de Oficio a 2 digitos"
-	label define oficio_f  1 "00-20" 0 "21 y más"
-	label values oficio_f  oficio_f
-
-*- Directorio de variables 
-
-/*
-    p6430 - En este trabajo … es?
-    p3045 - La empresa, negocio o institución en la que ….. trabaja ¿está registrada o tiene:
-    p3045s1 - Opción de camara de comercio
-    p3046 - La empresa o negocio en la que …… trabaja tiene una oficina de contabilidad o cuenta con los servicios de un contador?
-    p3069 - ¿Cuántas personas en total tiene la empresa, negocio, industria, oficina, firma, finca o sitio donde ... trabaja?
-    p6765 - En la semana pasada, ¿cuál de las siguientes formas de trabajo realizó:
-    p3067s1 - ¿... ha renovado ese registro?
-    p3067s2 - ¿Cuál fue el último año en el que renovó este registro?
-    p6775 - ¿El negocio o actividad de ... lleva contabilidad (realiza anualmente balance general y estado de perdidas y ganancias), o libro de registro diario de operaciones?
-
-    *- Variable de Oficio -*
-
-    oficio_c8 - Oficio de los Ocupados
-    
-    */
+*********************
+*	ASALARIADOS		*
+*********************
+replace formal=1 if p6430==2 & formal==.
+replace formal=1 if inlist(p6430,1,7) & p3045s1==1 & formal==.  /*Tiene CC*/
+replace formal=1 if inlist(p6430,1,7) & (inlist(p3045s1,2,9) & p3046==1) & formal==. /* No registra cc, SI contabilidad*/
+replace formal=0 if inlist(p6430,1,7) & (inlist(p3045s1,2,9) & p3046==2) & formal==. /* NO registra cc, NO contabilidad*/
+replace formal=1 if (inlist(p6430,1,7) & (inlist(p3045s1,2,9) & p3046==9) & p3069>=4) & formal==. /* NO registra cc, NO contabilidad, +5 */
+replace formal=0 if (inlist(p6430,1,7) & (inlist(p3045s1,2,9) & p3046==9) & p3069<=3) & formal==. /* NO registra cc, NO contabilidad, -5 */
 
 
-*- Generacion de la variable de informalidad
+*********************
+*	INDEPENDIENTES	*
+*********************
+*****************
+* SIN NEGOCIO	*
+*****************
+replace formal=1 if (inlist(p6430,4,5) & p6765!=7 & p3065==1) & formal==. /*No tiene negocio, Si CC */
+replace formal=1 if (inlist(p6430,4,5) & p6765!=7 & inlist(p3065,2,9) & p3066==1) & formal==. /*No negocio,No o N/S CC, SI contabilidad */
+replace formal=0 if (inlist(p6430,4,5) & p6765!=7 & inlist(p3065,2,9) & p3066==2) & formal==. /*No negocio,No o N/S CC, No contabilidad */
+replace formal=1 if (p6430==5 		  & p6765!=7 & inlist(p3065,2,9) & p3066==9 & p3069>=4) & formal==. /*No neg,No o N/S CC, N/S contab,Empre >5 */
+replace formal=0 if (p6430==5         & p6765!=7 & inlist(p3065,2,9) & p3066==9 & p3069<=3) & formal==. /*No neg,No o N/S CC, N/S contab,Empre <=5 */
+replace formal=1 if (p6430==4 		  & p6765!=7 & inlist(p3065,2,9) & p3066==9 & (oficio_c8_2d>=0 & oficio_c8_2d<=20)) & formal==. /*No neg,No o N/S CC, N/S contab*/
+replace formal=0 if (p6430==4 		  & p6765!=7 & inlist(p3065,2,9) & p3066==9 & (oficio_c8_2d>=21)) & formal==. /*No neg,No o N/S CC, N/S contab
 
-    gen informalidad_DANE = .
-    label var informalidad_DANE "Nueva definición DANE MC2018"
-    label define informalidad 0 "Formal" 1 "Informal"
+*********************************************
+*	CON NEGOCIO; CON REGISTRO MERCANTIL		*
+********************************************/
 
-*- Ocupados: Asalariados (primera diapositiva)
+replace formal=1 if (inlist(p6430,4,5) & p6765==7 & p3067==1 & p3067s1==1 & p3067s2>=anios) & formal==.
+replace formal=0 if (inlist(p6430,4,5) & p6765==7 & p3067==1 & p3067s1==1 & p3067s2<anios) & formal==.
+replace formal=1 if (inlist(p6430,4,5) & p6765==7 & p3067==1 & p3067s1==2 & p6775==1) & formal==.
+replace formal=1 if (inlist(p6430,4,5) & p6765==7 & p3067==1 & p3067s1==2 & p6775==3 & (oficio_c8_2d >=0 & oficio_c8_2d<=20)) & formal==.
+replace formal=0 if (inlist(p6430,4,5) & p6765==7 & p3067==1 & p3067s1==2 & p6775==3 & (oficio_c8_2d >=21)) & formal==.
+replace formal=0 if (inlist(p6430,4,5) & p6765==7 & p3067==1 & p3067s1==2 & p6775==2) & formal==.
+replace formal=1 if (p6430==4 & p6765==7 & p3067==1 & p3067s1==2 & p6775==9 & (oficio_c8_2d>=0 & oficio_c8_2d<=20)) & formal==.
+replace formal=0 if (p6430==4 & p6765==7 & p3067==1 & p3067s1==2 & p6775==9 & (oficio_c8_2d>=21)) & formal==.
+replace formal=1 if (p6430==5 & p6765==7 & p3067==1 & p3067s1==2 & p6775==9 & p3069>= 4) & formal==.
+replace formal=0 if (p6430==5 & p6765==7 & p3067==1 & p3067s1==2 & p6775==9 & p3069<=3) & formal==.
 
-    * Formal
-    replace informalidad_DANE = 0 if poc_ocu ==  2
-    replace informalidad_DANE = 0 if (poc_ocu == 1 | poc_ocu == 7) & p3045s1 == 1 
-    replace informalidad_DANE = 0 if (poc_ocu == 1 | poc_ocu == 7) & p3045s1 == 2 & p3046 == 1 
-    replace informalidad_DANE = 0 if (poc_ocu == 1 | poc_ocu == 7) & (p3045s1 == 2 | p3045s1 == 9) & p3046 == 9 & tam5_empresa == 0
+******************************
+*	SIN REGISTRO MERCANTIL	 *
+******************************
+replace formal=1 if (inlist(p6430,4,5) & p6765==7 & p3067==2 & p6775==1 & p3068==1)  & formal==.
+replace formal=0 if (inlist(p6430,4,5) & p6765==7 & p3067==2 & p6775==1 & p3068==2) & formal==.
+replace formal=1 if (inlist(p6430,4,5) & p6765==7 & p3067==2 & p6775==3 & (oficio_c8_2d>=0 & oficio_c8_2d<=20)) & formal==.
+replace formal=0 if (inlist(p6430,4,5) & p6765==7 & p3067==2 & p6775==3 & (oficio_c8_2d>=21)) & formal==.
+replace formal=0 if (inlist(p6430,4,5) & p6765==7 & p3067==2 & p6775==1 & p3068==9) & formal==.
+replace formal=0 if (inlist(p6430,4,5) & p6765==7 & p3067==2 & p6775==2) & formal==.
+replace formal=1 if (p6430==5 & p6765==7 & p3067==2 & p6775==9 & p3069>=4) & formal==.
+replace formal=0 if (p6430==5 & p6765==7 & p3067==2 & p6775==9 & p3069<=3) & formal==.
+replace formal=1 if (p6430==4 & p6765==7 & p3067==2 & p6775==9 & (oficio_c8_2d>=0 & oficio_c8_2d<=20)) & formal==. 
+replace formal=0 if (p6430==4 & p6765==7 & p3067==2 & p6775==9 & (oficio_c8_2d>=21)) & formal==.
 
-    * Informal
-    replace informalidad_DANE = 1 if (poc_ocu == 1 | poc_ocu == 7) & (p3045s1 == 2 | p3045s1 == 9) & p3046 == 2 
-    replace informalidad_DANE = 1 if (poc_ocu == 1 | poc_ocu == 7) & (p3045s1 == 2 | p3045s1 == 9) & p3046 == 9 & tam5_empresa == 1
+*****************************
+*	OCUPACIÃ"N INFORMAL		*	
+*****************************
 
-*- Independientes sin negocio: Independientes (Segunda diapositiva)
+*************
+*	SALUD	*
+*************
+gen salud=.
+replace salud=1 if ((inlist(p6430,1,2,3,7) & inlist(p6100,1,2) & inlist(p6110,1,2,4))) & salud==. /*Contr, espec*/ /*empre, parte y parte, le descuentan de pensi*/
+replace salud=1 if ( inlist(p6430,1,2,3,7) & p6100==9 & p6450==2) & salud==. /*no sabe regimen*//*contrato escrito*/
+replace salud=1 if ( inlist(p6430,1,2,3,7) & p6110==9 & p6450==2) & salud==. /*no sabe quien paga*//*contrato escrito*/
+replace salud=0 if   inlist(p6430,1,2,3,7) & salud==.
 
-    * Formal
-    replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 != 7 & p3045s1 == 1 
-    replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 != 7 & (p3045s1 == 2 | p3045s1 == 9) & p3046 == 1 
-    replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 != 7 & (p3045s1 == 2 | p3045s1 == 9) & p3046 == 9 & tam5_empresa == 0
+*****************
+*	PENSION	*
+*****************
+gen pension=.
+replace pension=1 if (inlist(p6430,1,2,3,7) & p6920==3) & pension==.
+replace pension=1 if (inlist(p6430,1,2,3,7) & p6920==1 & inlist(p6930,1,2,3) & inlist(p6940,1,3)) & pension==. /*Privado, colpen, Reg esp*/ /*paga una parte, la empresa*/
+replace pension=0 if  inlist(p6430,1,2,3,7) & pension==.
 
-    * Informal    
-    replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 != 7 & (p3045s1 == 2 | p3045s1 == 9) & p3046 == 2 
-    replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 != 7 & (p3045s1 == 2 | p3045s1 == 9) & p3046 == 2 & tam5_empresa == 1
-
-*- Independientes con negocio: Independientes (Tercera diapositiva)
-
-    * Formal
-    replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 1 & mer_año == 1 
-    replace informalidad_DANE = 0 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 1 
-
-        *------
-        replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 3 & oficio_f == 1 
-
-    * Informal    
-    replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 1 & mer_año == 0 
-    replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 2 
-    
-        *------
-        replace informalidad_DANE = 1 if (poc_ocu == 4 | poc_ocu == 5) & p6765 == 7 & p3045s1 == 1 & p3067s1 == 2 & p6775 == 3 & oficio_f == 0
-
+*****************************
+*	OCUPACIÃ"N INFORMAL		*
+*****************************
+gen ei=.
+replace ei=0 if inlist(p6430,6,8) & ei==.
+replace ei=formal if inlist(p6430,4,5) & ei==.
+replace ei=1 if inlist(p6430,1,2,3,7) & (salud==1 & pension==1) & ei==.
+replace ei=0 if inlist(p6430,1,2,3,7) & ei==.
 
 
-
-
-
+tab ei if oci==1 & inlist(mes,5,6,7) [iw=fex_c18 /3],m
