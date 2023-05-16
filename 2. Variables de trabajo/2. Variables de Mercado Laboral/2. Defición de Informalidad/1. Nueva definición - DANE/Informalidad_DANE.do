@@ -1,5 +1,5 @@
 ********************************************************************************************
-* Insitucion:   	Banco Mundial - Grupo de Empleo 
+* Insitucion:   	Ministerio del Trabajo 
 * Autor: 		    Cristian Camilo Sanin Camargo 						  
 * Version:		    1.0
 * Descripción:		Definicion de informalidad - DANE MC2018 - Nueva 
@@ -34,7 +34,6 @@ replace formal=1 if inlist(p6430,1,7) & (inlist(p3045s1,2,9) & p3046==1) & forma
 replace formal=0 if inlist(p6430,1,7) & (inlist(p3045s1,2,9) & p3046==2) & formal==. /* NO registra cc, NO contabilidad*/
 replace formal=1 if (inlist(p6430,1,7) & (inlist(p3045s1,2,9) & p3046==9) & p3069>=4) & formal==. /* NO registra cc, NO contabilidad, +5 */
 replace formal=0 if (inlist(p6430,1,7) & (inlist(p3045s1,2,9) & p3046==9) & p3069<=3) & formal==. /* NO registra cc, NO contabilidad, -5 */
-
 
 *********************
 *	INDEPENDIENTES	*
